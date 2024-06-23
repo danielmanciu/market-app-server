@@ -10,4 +10,4 @@ RUN npm install
 
 EXPOSE 2024
 
-CMD ["npm", "start"]
+ENTRYPOINT ["npm", "start"]

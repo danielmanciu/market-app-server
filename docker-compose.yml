@@ -1,0 +1,7 @@
+services:
+  server:
+    build: .
+    ports:
+      - "2024:2024"
+    container_name: market-app-server
+
