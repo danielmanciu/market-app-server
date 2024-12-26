@@ -1,7 +1,13 @@
 services:
-  server:
+  market_api:
     build: .
-    ports:
-      - "2024:2024"
-    container_name: market-app-server
+    container_name: market_app_server
 
+  nginx:
+    restart: always
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+    ports:
+      - "80:80"
