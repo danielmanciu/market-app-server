@@ -1,7 +1,7 @@
 {
     "AWSEBDockerrunVersion": "1",
     "Image": {
-      "Name": "danielmanciu/market-app",
+      "Name": "danielmanciu/market-app-server:0.1.0",
       "Update": "true"
     },
     "Ports": [

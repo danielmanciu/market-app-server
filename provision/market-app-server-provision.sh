@@ -17,6 +17,4 @@ echo \
 sudo apt-get update
 
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
-
-docker run --detach --restart=always --name market_app_server --publish 2024:2024 danielmanciu/market-app
-
+sudo usermod -aG docker $USER
