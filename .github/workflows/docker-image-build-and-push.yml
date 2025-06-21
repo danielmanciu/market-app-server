@@ -1,0 +1,49 @@
+name: Build and push Docker Image to ECR
+
+on:
+  push:
+    tags:
+      - '*'
+  
+env:
+  AWS_REGION: eu-north-1
+  AWS_ACCOUNT_ID: 267348411096
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionRole
+        aws-region: ${{ env.AWS_REGION }} 
+
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set ECR variables
+      id: ecr-vars
+      run: |
+        echo "aws_ecr_registry=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com" >> "$GITHUB_OUTPUT"
+        echo "aws_ecr_repository=danielmanciu/market-app-server" >> "$GITHUB_OUTPUT"
+
+    - name: Extract tag
+      id: extract-tag
+      run: |
+        echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.ecr-vars.outputs.aws_ecr_registry }}/${{ steps.ecr-vars.outputs.aws_ecr_repository }}:${{ steps.extract-tag.outputs.tag }}

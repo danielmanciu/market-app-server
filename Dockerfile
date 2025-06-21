@@ -1,8 +1,6 @@
 FROM node:16-alpine
 
-WORKDIR /usr/src/market-app
-
-COPY . .
+COPY server /usr/src/market-app/server
 
 WORKDIR /usr/src/market-app/server
 
