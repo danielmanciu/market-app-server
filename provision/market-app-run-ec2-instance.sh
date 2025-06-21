@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROVISION_SCRIPT="file://$(dirname $(realpath "$0"))/aws-ec2-provision.sh"
+PROVISION_SCRIPT="file://$(dirname $(realpath "$0"))/market-app-server-user-data.sh"
 
 aws ec2 run-instances \
     --image-id ami-0e86e20dae9224db8 \
