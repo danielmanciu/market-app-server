@@ -9,12 +9,12 @@ resource "aws_instance" "market_app_server" {
   }
 
   # ALTENATIVE: using user data instead of provisioners
-  user_data = file("${path.module}/../provision/market-app-server-user-data.sh")
+  # user_data = file("${path.module}/../provision/market-app-server-user-data.sh")
 
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("/Users/daniel/.ssh/id_ed25519_tf")
+    private_key = file(pathexpand("~/.ssh/id_ed25519_tf"))
     host        = self.public_ip
   }
 
