@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Add Docker's official GPG key:
+# Setup Docker
 sudo apt-get update
 sudo apt-get install ca-certificates curl -y
 
@@ -18,3 +18,13 @@ sudo apt-get update
 
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sudo usermod -aG docker $USER
+
+# Install additional apt packages
+sudo apt install unzip -y
+
+# Setup AWS
+cd /tmp
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm awscliv2.zip
