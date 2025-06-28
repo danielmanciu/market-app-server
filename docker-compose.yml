@@ -1,6 +1,6 @@
 services:
   market_app:
-    image: danielmanciu/market-app-server:0.1.0
+    image: danielmanciu/market-app-server:latest
     restart: unless-stopped
     container_name: market_app_server
     networks:
@@ -11,7 +11,7 @@ services:
     container_name: nginx
     restart: unless-stopped
     volumes:
-      - "./nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
       - "./nginx/certs:/etc/nginx/certs"
     ports:
       - "80:80"
