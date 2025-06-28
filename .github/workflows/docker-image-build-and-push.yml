@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+      - '!*-test'
   
 env:
   AWS_REGION: eu-north-1
