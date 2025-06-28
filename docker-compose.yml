@@ -1,6 +1,6 @@
 services:
   market_app:
-    image: danielmanciu/market-app-server:latest
+    image: danielmanciu/market-app-server:0.2.0
     restart: unless-stopped
     container_name: market_app_server
     networks:
