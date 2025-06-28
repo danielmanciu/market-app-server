@@ -1,8 +1,10 @@
+# Create one instance that is provisioned using scripts in ../provision
 resource "aws_instance" "market_app_server" {
   ami                    = data.aws_ami.market_app_ami_id.id
   instance_type          = "t3.micro"
   key_name               = aws_key_pair.market_app_server_kp.key_name
   vpc_security_group_ids = [aws_security_group.market_app_server_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.market_app_ec2_profile.name
 
   tags = {
     Project = "MarketApp"
@@ -43,6 +45,7 @@ resource "aws_instance" "market_app_server" {
   }
 }
 
+# Make sure instance is running
 resource "aws_ec2_instance_state" "market_app_instance_state" {
   instance_id = aws_instance.market_app_server.id
   state       = "running"
