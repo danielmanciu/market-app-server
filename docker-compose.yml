@@ -1,13 +1,23 @@
 services:
-  market_api:
-    build: .
+  market_app:
+    image: danielmanciu/market-app-server:0.1.0
+    restart: unless-stopped
     container_name: market_app_server
+    networks:
+      - market-app-network
 
   nginx:
-    restart: always
-    image: nginx:latest
+    image: nginx:1.29.0-alpine
     container_name: nginx
+    restart: unless-stopped
     volumes:
-      - "./nginx/default.conf:/etc/nginx/conf.d/default.conf"
+      - "./nginx/nginx.conf:/etc/nginx/conf.d/default.conf"
+      - "./nginx/certs:/etc/nginx/certs"
     ports:
       - "80:80"
+      - "443:443"
+    networks:
+      - market-app-network
+
+networks:
+  market-app-network:
