@@ -9,6 +9,7 @@ on:
 env:
   AWS_REGION: eu-north-1
   AWS_ACCOUNT_ID: 267348411096
+  S3_BUCKET_NAME: market-app-s3
 
 jobs:
   build-and-push:
@@ -37,14 +38,17 @@ jobs:
         echo "aws_ecr_registry=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com" >> "$GITHUB_OUTPUT"
         echo "aws_ecr_repository=danielmanciu/market-app-server" >> "$GITHUB_OUTPUT"
 
-    - name: Extract tag
-      id: extract-tag
-      run: |
-        echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
         push: true
-        tags: ${{ steps.ecr-vars.outputs.aws_ecr_registry }}/${{ steps.ecr-vars.outputs.aws_ecr_repository }}:${{ steps.extract-tag.outputs.tag }}
+        tags: ${{ steps.ecr-vars.outputs.aws_ecr_registry }}/${{ steps.ecr-vars.outputs.aws_ecr_repository }}:${{ github.ref_name }}
+
+    - name: Update docker-compose.yml with tag
+      run: |
+        sed -i "s|image: ${{ steps.ecr-vars.outputs.aws_ecr_repository }}:.*|image: ${{ steps.ecr-vars.outputs.aws_ecr_repository }}:${{ github.ref_name }}|" docker-compose.yml
+
+    - name: Upload docker-compose.yml to S3
+      run: |
+        aws s3 cp docker-compose.yml s3://${{ env.S3_BUCKET_NAME }}/docker/docker-compose.yml --metadata "version=${{ github.ref_name }}"
