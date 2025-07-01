@@ -1,8 +1,8 @@
 FROM node:16-alpine
 
-COPY server /usr/src/market-app/server
+COPY . /server/market-app
 
-WORKDIR /usr/src/market-app/server
+WORKDIR /server/market-app
 
 RUN npm install
 
