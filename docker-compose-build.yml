@@ -1,13 +1,15 @@
 services:
   market_app:
-    image: danielmanciu/market-app-server:0.1.0
+    image: danielmanciu/market-app-server:latest
+    build: ./server/market-app
     restart: unless-stopped
     container_name: market_app_server
     networks:
       - shared-network
 
   car_app:
-    image: danielmanciu/car-app-server:0.1.0
+    image: danielmanciu/car-app-server:latest
+    build: ./server/car-app
     restart: unless-stopped
     container_name: car_app_server
     networks:

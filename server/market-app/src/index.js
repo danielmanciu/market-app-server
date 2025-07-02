@@ -39,17 +39,41 @@ for (let i = 0; i < 10; i++) {
 }
 
 const router = new Router();
-router.get('/products', ctx => {
-    ctx.response.body = products.filter(product => product.status !== statusTypes[1]);
-    ctx.response.status = 200;
-});
+const broadcast = (data) =>
+    wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(data));
+        }
+    });
 
 router.get('/all', ctx => {
     ctx.response.body = products;
     ctx.response.status = 200;
 });
 
-router.post('/buyProduct', ctx => {
+router.get('/:id', ctx => {
+    console.log("ctx: " + JSON.stringify(ctx));
+    const headers = ctx.params;
+    console.log("body: " + JSON.stringify(headers));
+    const id = headers.id;
+    if (typeof id !== 'undefined') {
+        const index = products.findIndex(product => product.id == id);
+        if (index === -1) {
+            console.log("No product with id: " + id);
+            ctx.response.body = {text: 'Invalid product id'};
+            ctx.response.status = 404;
+        } else {
+            let product = products[index];
+            ctx.response.body = product;
+            ctx.response.status = 200;
+        }
+    } else {
+        ctx.response.body = {text: 'Id missing or invalid'};
+        ctx.response.status = 404;
+    }
+});
+
+router.post('/buy', ctx => {
     // console.log("ctx: " + JSON.stringify(ctx));
     const headers = ctx.request.body;
     // console.log("body: " + JSON.stringify(headers));
@@ -77,14 +101,7 @@ router.post('/buyProduct', ctx => {
     }
 });
 
-const broadcast = (data) =>
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(data));
-        }
-    });
-
-router.post('/product', ctx => {
+router.post('/add', ctx => {
     // console.log("ctx: " + JSON.stringify(ctx));
     const headers = ctx.request.body;
     // console.log("body: " + JSON.stringify(headers));
@@ -124,7 +141,7 @@ router.post('/product', ctx => {
     }
 });
 
-router.del('/product/:id', ctx => {
+router.del('/:id', ctx => {
     console.log("ctx: " + JSON.stringify(ctx));
     const headers = ctx.params;
     console.log("body: " + JSON.stringify(headers));
