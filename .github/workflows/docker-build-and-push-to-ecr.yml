@@ -1,0 +1,72 @@
+name: Build Docker image and push to ECR
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        required: true
+        type: string
+      build_context:
+        required: true
+        type: string
+      build_file:
+        required: false
+        type: string
+        default: "Dockerfile"
+
+    outputs:
+      aws_ecr_repository:
+        description: The name of the repository to be built and pushed.
+        value: ${{ jobs.docker-build-and-push-to-ecr.outputs.aws_ecr_repository }}
+      aws_ecr_image_ref:
+        description: The full image ref that the image is pushed to.
+        value: ${{ jobs.docker-build-and-push-to-ecr.outputs.aws_ecr_image_ref }}
+
+env:
+  AWS_REGION: eu-north-1
+  AWS_ACCOUNT_ID: 267348411096
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  docker-build-and-push-to-ecr:
+    name: Build and push Docker Image
+    runs-on: ubuntu-latest
+ 
+    outputs:
+      aws_ecr_repository: ${{ steps.ecr-vars.outputs.aws_ecr_repository }}
+      aws_ecr_image_ref: ${{ steps.ecr-vars.outputs.aws_ecr_image_ref }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GithubActionRole
+          aws-region: ${{ env.AWS_REGION }} 
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set ECR variables
+        id: ecr-vars
+        env:
+          AWS_ECR_NAMESPACE: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com 
+          AWS_ECR_REPOSITORY: ${{ inputs.repository }}
+          AWS_ECR_REPOSITORY_TAG: ${{ github.ref_name }}
+        run: |
+          echo "aws_ecr_namespace=${AWS_ECR_NAMESPACE}" >> "$GITHUB_OUTPUT"
+          echo "aws_ecr_repository=${AWS_ECR_REPOSITORY}" >> "$GITHUB_OUTPUT"
+          echo "aws_ecr_image_ref=${AWS_ECR_NAMESPACE}/${AWS_ECR_REPOSITORY}:${AWS_ECR_REPOSITORY_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.build_context }}
+          file: ${{ inputs.build_context }}/${{ inputs.build_file }}
+          push: true
+          tags: ${{ steps.ecr-vars.outputs.aws_ecr_image_ref }}
