@@ -3,8 +3,8 @@ name: Push Docker Image and nginx config
 on:
   push:
     tags:
-      # - '*'
-      - '*-test'
+      - '*'
+      - '!*-test'
   
 env:
   AWS_REGION: eu-north-1
