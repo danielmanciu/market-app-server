@@ -1,0 +1,8 @@
+- name: Setup cmd tools
+  hosts: market_app_servers
+  become: yes
+  tasks:
+    - name: Install tree command
+      ansible.builtin.apt:
+        name: tree
+        update_cache: yes

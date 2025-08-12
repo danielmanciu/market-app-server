@@ -1,5 +1,6 @@
 # Create one instance that is provisioned using scripts in ../provision
 resource "aws_instance" "market_app_server" {
+  count                  = var.market_app_server_count
   ami                    = data.aws_ami.market_app_ami_id.id
   instance_type          = "t3.micro"
   key_name               = aws_key_pair.market_app_server_kp.key_name
@@ -7,46 +8,48 @@ resource "aws_instance" "market_app_server" {
   iam_instance_profile   = aws_iam_instance_profile.market_app_ec2_profile.name
 
   tags = {
+    Name    = "market-app-${count.index + 1}"
     Project = "MarketApp"
   }
 
   # ALTENATIVE: using user data instead of provisioners
   # user_data = file("${path.module}/../provision/market-app-server-user-data.sh")
 
-  connection {
-    type        = "ssh"
-    user        = "ubuntu"
-    private_key = file(pathexpand("~/.ssh/id_ed25519_tf"))
-    host        = self.public_ip
-  }
+  # connection {
+  #   type        = "ssh"
+  #   user        = "ubuntu"
+  #   private_key = file(pathexpand("~/.ssh/id_ed25519_tf"))
+  #   host        = self.public_ip
+  # }
 
-  provisioner "file" {
-    source      = "${path.module}/../provision/market-app-server-provision.sh"
-    destination = "/tmp/provision.sh"
-  }
+  # provisioner "file" {
+  #   source      = "${path.module}/../provision/market-app-server-provision.sh"
+  #   destination = "/tmp/provision.sh"
+  # }
 
-  provisioner "file" {
-    source      = "${path.module}/../provision/market-app-server-run.sh"
-    destination = "/tmp/run.sh"
-  }
+  # provisioner "file" {
+  #   source      = "${path.module}/../provision/market-app-server-run.sh"
+  #   destination = "/tmp/run.sh"
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/provision.sh",
-      "/tmp/provision.sh",
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/provision.sh",
+  #     "/tmp/provision.sh",
+  #   ]
+  # }
 
-  provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/run.sh",
-      "/tmp/run.sh",
-    ]
-  }
+  # provisioner "remote-exec" {
+  #   inline = [
+  #     "chmod +x /tmp/run.sh",
+  #     "/tmp/run.sh",
+  #   ]
+  # }
 }
 
 # Make sure instance is running
 resource "aws_ec2_instance_state" "market_app_instance_state" {
-  instance_id = aws_instance.market_app_server.id
+  count = var.market_app_server_count
+  instance_id = aws_instance.market_app_server[count.index].id
   state       = "running"
 }
